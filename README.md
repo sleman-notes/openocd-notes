@@ -28,3 +28,24 @@ Once connected, openOCD can stay running as a server and open three ports:
 Or, it will runs one command list and exit, like erase/flash.
 
 ## Install
+
+In windows and linux can be found the xPack with the binaries, set to path and
+see if it works with:
+
+```bash
+openocd --version
+```
+
+#### Drivers (Windows)
+
+- **ST-Link:** install ST's driver (STSW-LINK009). It is WinUSB based, so
+OpenOCD and STM32CubeProgrammer work with it at the same time. If OpenOCD
+complains about the firmware version, update it with STLinkUpgrade (also from
+ST) or with STM32CubeProgrammer -> Firmware upgrade.
+
+- **J-Link:** OpenOCD reaches the J-Link through libusb, which needs the WinUSB
+driver, not SEGGER's default one. Open J-Link Configurator (installed with the
+J-Link Software Pack), select the probe, Configure, and switch the USB driver
+to WinUSB. SEGGER's own tools keep working with it.
+
+## First connection
