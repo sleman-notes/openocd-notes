@@ -49,3 +49,40 @@ J-Link Software Pack), select the probe, Configure, and switch the USB driver
 to WinUSB. SEGGER's own tools keep working with it.
 
 ## First connection
+
+With the probe plugged and the board powered:
+
+```bash
+openocd -f interface/stlink.cfg -f target/stm32f4x.cfg
+openocd -f interface/stlink.cfg -f target/stm32f1x.cfg
+```
+
+"-f" loads a config file. OpenOCD looks for it in the current folder first, and
+then in its own "scripts/" folder, that is why "interface/stlink.cfg" works from
+anywhere.
+
+## Talking with the Chip
+
+With the server running we can connect through telnet localhost in port 4444.
+
+Here some commands that can be run in the telnet session:
+
+```
+> halt                      # stop the CPU, shows PC and xPSR
+> reg                       # all core registers
+> mdw 0x08000000 4          # memory display word: 4 words from flash start
+> step                      # one instruction
+> resume                    # run again
+> reset halt                # reset and stop at the first instruction
+> reset run                 # reset and let it run
+> flash banks               # flash regions OpenOCD knows about
+> flash info 0              # sectors/pages of bank 0 and protection
+> exit                      # leaves telnet, OpenOCD keeps running
+```
+
+The first two words of the flash are the vector table, the initial stack pointer
+(0x2000xxxx) and the Reset_Handler Address. If "mdw 0x0800000" shows "ffffffff
+ffffffff", for stm32, the chip is empty.
+
+## Flashing
+
