@@ -86,3 +86,26 @@ ffffffff", for stm32, the chip is empty.
 
 ## Flashing
 
+Flashing does not need the server and the telnet, OpenOCD accepts commands
+with "-c" and runs them after the config files:
+
+```bash
+openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program build/blink.elf verify reset exit"
+```
+
+- **program:** init, halt, erase the needed sectors and write
+- **verify:** read back and compare
+- **reset:** runs the new firmware
+- **exit:** close OpenOCD at the end (otherwise it stays as a server)
+
+The .elf (and the .hex) carry the address inside, so OpenOCD knows where each
+section section goes. The **.bin** is only bytes, so we must give the address:
+
+```bash
+openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program build/blink.bin 0x08000000 verify reset exit"
+```
+
+A .bin flashed without the address goes to 0x00000000. Prefer the .elf whenever
+possible.
+
+## Our own config files
