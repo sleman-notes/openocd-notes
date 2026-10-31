@@ -109,3 +109,56 @@ A .bin flashed without the address goes to 0x00000000. Prefer the .elf whenever
 possible.
 
 ## Our own config files
+
+Typing "-f interface/... -f target/..." with the extra settings each time gets
+old fast. A config file is just those commands in a file, and it is the same
+language (TCL) that we type in telnet. The [configs/](configs/) folder has one
+per board and probe. You can use with:
+
+```bash
+openocd -f configs/stm32f411-stlink.cfg -c "program build/blink.elf verify reset exit"
+```
+
+The **order matters**: interface first, then transport, then anything that
+the target file reads (like "set CPUTAPID"), then the target, and only at the
+end what overrides the target (like "adapter speed", which the target files
+also set).
+
+## ST-Link vs J-Link
+
+From OpenOCD's side, changing the probe is changing one line, with one detail:
+
+```tcl
+# ST-Link
+source [find interface/stlink.cfg]
+transport select hla_swd
+
+# J-Link
+source [find interface/jlink.cfg]
+transport select swd
+```
+
+The ST-Link is a "high level adapter" (hla), it does the SWD work in its own
+firmware and OpenOCD only asks for "read this address", so its transport is
+"hla_swd". The J-Link gives OpenOCD control of the raw SWD, so the transport is
+plain "swd', and it must be explicit because the J-Link default is JTAG.
+
+OpenOCD is very great when we want the same commands, configs and Makefile for
+every probe.
+
+## Examples
+
+Some examples of use of the openOCD can be seen in the repo
+[simplest-build](https://github.com/sleman-notes/simplest-build), other examples
+in Makefile is:
+
+```bash
+cd examples/blink-f411
+make                        # build
+make flash                  # build + flash with ST-Link
+make flash PROBE=jlink      # build + flash with J-Link
+make erase                  # mass erase
+make server                 # OpenOCD as a server, for GDB/telnet
+make gdb                    # (other terminal) GDB connected to the server
+make clean
+```
